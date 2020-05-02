@@ -107,7 +107,7 @@
 <script>
 import Student from "../../data-types/Student";
 import { mapState } from "vuex";
-import { SAVE_STUDENT, CHANGE_STUDENT } from "../../store/actions/action-types";
+import { actionTypes } from "../../store/actions/studentActions";
 import {
   Modal,
   Form,
@@ -177,30 +177,33 @@ export default {
         if (!err) {
           this.confirmLoading = true;
           if (this.btnConfirm == "Create")
-            this.$store.dispatch(SAVE_STUDENT, formData).then(() => {
-              const h = this.$createElement;
-              success({
-                title: "Successful Message",
-                content: h("div", {}, [
-                  h("p", "Student has been successfully created!"),
-                ])
+            this.$store
+              .dispatch(actionTypes.saveStudent, formData)
+              .then(() => {
+                const h = this.$createElement;
+                success({
+                  title: "Successful Message",
+                  content: h("div", {}, [
+                    h("p", "Student has been successfully created!"),
+                  ]),
+                });
+              })
+              .finally(() => {
+                this.confirmLoading = false;
               });
-              
-            }).finally(() => {
-              this.confirmLoading = false;
-            });
-          else if (this.btnConfirm == "Update")
-            this.$store.dispatch(CHANGE_STUDENT, formData).then(() => {
-              
+          else if (this.btnConfirm == "Update") 
+          this.$store
+            .dispatch(actionTypes.updateStudent, formData)
+            .then(() => {
               const h = this.$createElement;
               success({
                 title: "Successful Message",
                 content: h("div", {}, [
                   h("p", "Student has been successfully updated!"),
-                ])
+                ]),
               });
-              
-            }).finally(() => {
+            })
+            .finally(() => {
               this.confirmLoading = false;
             });
         }

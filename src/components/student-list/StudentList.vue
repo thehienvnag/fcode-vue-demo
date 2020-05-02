@@ -28,6 +28,7 @@
       :columns="columns"
       :dataSource="studentStore.students.content"
       :pagination="false"
+      :loading="tableLoading"
     >
       <template slot="operation" slot-scope="text, record">
         <a-popconfirm
@@ -35,7 +36,10 @@
           title="Sure to delete?"
           @confirm="() => onDelete(record.id)"
         >
-          <a-button type="danger" icon="delete"></a-button>
+          <a-button
+            type="danger"
+            icon="delete"
+          ></a-button>
         </a-popconfirm>
         <a-button
           class="ml-20"
@@ -59,19 +63,15 @@
 
 <script>
 import Student from "../../data-types/Student";
-import { mapState } from "vuex";
-import {
-  LOAD_STUDENTS,
-  DELETE_STUDENT,
-  SEARCH_STUDENTS,
-} from "../../store/actions/action-types";
 import { Table, Input, Popconfirm, Pagination, Button } from "ant-design-vue";
 const { Search } = Input;
 import "ant-design-vue/lib/table/style/css";
 import "ant-design-vue/lib/input/style/css";
 import "ant-design-vue/lib/popconfirm/style/css";
 import InputModal from "../input-modal/InputModal";
-
+import { mapState } from "vuex";
+import { actionTypes } from "../../store/actions/studentActions";
+const { loadStudents, searchStudents, deleteStudent } = actionTypes;
 const columns = [
   {
     title: "Student Id",
@@ -109,6 +109,8 @@ export default {
       specificStudent: Student,
       searchLoading: false,
       refreshLoading: false,
+      tableLoading: false,
+      deleteLoading: false,
       //visible: false
     };
   },
@@ -118,17 +120,22 @@ export default {
   //     return this.$store.state.studentStore.students;
   //   },
   // },
-  created() {
-    this.$store.dispatch(LOAD_STUDENTS);
+  async created() {
+    this.tableLoading = true;
+    await this.$store.dispatch(loadStudents);
+    this.tableLoading = false;
   },
   methods: {
-    refreshTableData() {
+    async refreshTableData() {
       this.refreshLoading = true;
-      this.$store
-        .dispatch(LOAD_STUDENTS, this.currentPage - 1)
-        .finally(() => {
-          this.refreshLoading = false;
-        });
+      this.tableLoading = true;
+      try {
+        await this.$store.dispatch(loadStudents, this.currentPage - 1);
+      } catch (error) {
+        console.log(error);
+      }
+      this.refreshLoading = false;
+      this.tableLoading = false;
     },
     openModal() {
       this.$refs.inputModal.showModal();
@@ -137,21 +144,30 @@ export default {
       const studentForEdit = this.$store.getters.getStudentById(id);
       this.$refs.inputModal.showModalForEdit(studentForEdit);
     },
-    // hideModal(){
-    //   this.visible = false;
-    // },
-    onSearch(searchValue) {
-      this.searchLoading = true;
-      this.$store.dispatch(SEARCH_STUDENTS, searchValue).finally(() => {
+    async onSearch(searchValue) {
+      if (searchValue) {
+        this.searchLoading = true;
+        try {
+          await this.$store.dispatch(searchStudents, searchValue);
+        } catch (error) {
+          console.log(error);
+        }
         this.searchLoading = false;
-      });
+      }
     },
-    onDelete(key) {
-      this.$store.dispatch(DELETE_STUDENT, key);
+    async onDelete(key) {
+      await this.$store.dispatch(deleteStudent, key);
+      await this.refreshTableData();
     },
-    onChangePage(page) {
-      this.currentPage = page;
-      this.$store.dispatch(LOAD_STUDENTS, page - 1);
+    async onChangePage(page) {
+      this.tableLoading = true;
+      try {
+        await this.$store.dispatch(loadStudents, page - 1);
+      } catch (error) {
+        console.log(error);
+      }
+
+      this.tableLoading = false;
     },
   },
   components: {
@@ -179,5 +195,8 @@ export default {
 .d-flex {
   display: flex;
   justify-content: space-between;
+}
+.ant-spin-dot {
+  width: 40px;
 }
 </style>
