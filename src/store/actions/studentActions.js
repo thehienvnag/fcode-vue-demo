@@ -26,21 +26,21 @@ export const actionTypes = {
 export const actions = {
   [loadStudents]: async ({ commit }, page = 0, size = 5) => {
     const uri = `students?page=${page}&size=${size}`; 
-    await wait(700); 
+    await wait(500); 
     const { data } = await axiosInstance.get(uri);
     commit(SAVE_STUDENTS, data);
     return;
   },
   [searchStudents]: async ({ commit }, searchValue) => {
     const uri = `students?q=${searchValue}`;
-    await wait(700);
+    await wait(500);
     const { data } = await axiosInstance.get(uri);
     commit(SAVE_STUDENTS, data);
     return;
   },
   [deleteStudent]: async ({ commit }, id) => {
     const uri = `students/${id}`;
-    await wait(700);
+    await wait(500);
     const { data } = await axiosInstance.delete(uri);
     commit(DELETE_STUDENT, data.id);
     return;
@@ -50,7 +50,7 @@ export const actions = {
   },
   [saveStudent]: async ({ commit }, formData) => {
     const uri = `students`;
-    await wait(700);
+    await wait(500);
     const { data } = await axiosInstance.post(uri, formData);
     commit(ADD_STUDENT, data);
     return;
@@ -58,7 +58,7 @@ export const actions = {
   [updateStudent]: async ({ commit }, formData) => {
     console.log(formData.id);
     const uri = `students/${formData.id}`;
-    await wait(700);
+    await wait(500);
     const { data } = await axiosInstance.put(uri, formData);
     commit(UPDATE_STUDENT, data.id);
     return;

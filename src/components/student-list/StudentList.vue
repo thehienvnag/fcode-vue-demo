@@ -161,12 +161,12 @@ export default {
     },
     async onChangePage(page) {
       this.tableLoading = true;
+      this.currentPage = page;
       try {
         await this.$store.dispatch(loadStudents, page - 1);
       } catch (error) {
         console.log(error);
       }
-
       this.tableLoading = false;
     },
   },

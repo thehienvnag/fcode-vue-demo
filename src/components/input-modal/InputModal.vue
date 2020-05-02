@@ -108,6 +108,7 @@
 import Student from "../../data-types/Student";
 import { mapState } from "vuex";
 import { actionTypes } from "../../store/actions/studentActions";
+const { saveStudent, updateStudent } = actionTypes;
 import {
   Modal,
   Form,
@@ -159,7 +160,7 @@ export default {
   methods: {
     showModal() {
       this.btnConfirm = "Create";
-      this.studentForEdit = new Student("", "", "", "");
+      this.studentForEdit = new Student();
       this.form.resetFields();
       this.visible = true;
     },
@@ -176,38 +177,33 @@ export default {
       this.form.validateFieldsAndScroll((err, formData) => {
         if (!err) {
           this.confirmLoading = true;
-          if (this.btnConfirm == "Create")
-            this.$store
-              .dispatch(actionTypes.saveStudent, formData)
-              .then(() => {
-                const h = this.$createElement;
-                success({
-                  title: "Successful Message",
-                  content: h("div", {}, [
-                    h("p", "Student has been successfully created!"),
-                  ]),
-                });
-              })
-              .finally(() => {
-                this.confirmLoading = false;
-              });
-          else if (this.btnConfirm == "Update") 
-          this.$store
-            .dispatch(actionTypes.updateStudent, formData)
-            .then(() => {
-              const h = this.$createElement;
-              success({
-                title: "Successful Message",
-                content: h("div", {}, [
-                  h("p", "Student has been successfully updated!"),
-                ]),
-              });
-            })
-            .finally(() => {
-              this.confirmLoading = false;
-            });
+          if (this.btnConfirm == "Create") {
+            this.handleCreate(formData);
+          } else if (this.btnConfirm == "Update") {
+            this.handleUpdate(formData);
+          }
         }
       });
+    },
+    async handleUpdate(formData) {
+      await this.$store.dispatch(updateStudent, formData);
+      success({
+        title: "Successful Message",
+        content: this.$createElement("div", {}, [
+          this.$createElement("p", "Student has been successfully updated!"),
+        ]),
+      });
+      this.confirmLoading = false;
+    },
+    async handleCreate(formData) {
+      await this.$store.dispatch(saveStudent, formData);
+      success({
+        title: "Successful Message",
+        content: this.$createElement("div", {}, [
+          this.$createElement("p", "Student has been successfully created!"),
+        ]),
+      });
+      this.confirmLoading = false;
     },
   },
 };
